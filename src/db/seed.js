@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { faker } from '@faker-js/faker';
 
 const seed = async (db) => {
     await db.query(`
@@ -42,7 +43,29 @@ INSERT INTO users (
 ) RETURNING id;
     `, ['eliotpszw', hashedPassword, true]);
 
+    const generatedUserValues = new Array(10000)
+        .fill('')
+        .map((e, i) => {
+           return {
+               username: `${faker.internet.username()}${i}`,
+               password: faker.internet.password(),
+               admin: false,
+           };
+        })
+        .map(({ username, password, admin }) => {
+            return `('${username}', '${password}', ${admin})`
+        })
+        .join(', ');
+
     await db.query(`
+INSERT INTO users (
+    username,
+    password,
+    admin
+) VALUES ${generatedUserValues};
+    `)
+
+        await db.query(`
 INSERT INTO tasks (
     title,
     description,

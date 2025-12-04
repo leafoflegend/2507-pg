@@ -68,6 +68,16 @@ class UserModel {
             admin: user.admin,
         };
     }
+
+    confirmUserExists = async (username) => {
+        const { rows } = await this.db.query(`
+            SELECT * FROM users WHERE username=$1 LIMIT 1;
+        `, [username]);
+
+        const user = rows[0];
+
+        return !!user;
+    }
 }
 
 const userModel = new UserModel(db);
